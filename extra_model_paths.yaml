@@ -4,7 +4,7 @@
 #config for a1111 ui
 #all you have to do is change the base_path to where yours is installed
 a111:
-    base_path: path/to/stable-diffusion-webui/
+    base_path: D:\projects\ai\stable-diffusion-webui
 
     checkpoints: models/Stable-diffusion
     configs: models/Stable-diffusion
@@ -18,7 +18,7 @@ a111:
                   models/SwinIR
     embeddings: embeddings
     hypernetworks: models/hypernetworks
-    controlnet: models/ControlNet
+    controlnet: extensions\sd-webui-controlnet\models
 
 #config for comfyui
 #your base path should be either an existing comfy install or a central folder where you store all of your models, loras, etc.
