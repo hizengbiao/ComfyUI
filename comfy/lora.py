@@ -30,6 +30,7 @@ def load_lora(lora, to_load):
         regular_lora = "{}.lora_up.weight".format(x)
         diffusers_lora = "{}_lora.up.weight".format(x)
         diffusers2_lora = "{}.lora_B.weight".format(x)
+        diffusers3_lora = "{}.lora.up.weight".format(x)
         transformers_lora = "{}.lora_linear_layer.up.weight".format(x)
         A_name = None
 
@@ -44,6 +45,10 @@ def load_lora(lora, to_load):
         elif diffusers2_lora in lora.keys():
             A_name = diffusers2_lora
             B_name = "{}.lora_A.weight".format(x)
+            mid_name = None
+        elif diffusers3_lora in lora.keys():
+            A_name = diffusers3_lora
+            B_name = "{}.lora.down.weight".format(x)
             mid_name = None
         elif transformers_lora in lora.keys():
             A_name = transformers_lora
@@ -247,15 +252,14 @@ def model_lora_keys_unet(model, key_map={}):
                 key_map[diffusers_lora_key] = unet_key
 
     if isinstance(model, comfy.model_base.SD3): #Diffusers lora SD3
-        for i in range(model.model_config.unet_config.get("depth", 0)):
-            k = "transformer.transformer_blocks.{}.attn.".format(i)
-            qkv = "diffusion_model.joint_blocks.{}.x_block.attn.qkv.weight".format(i)
-            proj = "diffusion_model.joint_blocks.{}.x_block.attn.proj.weight".format(i)
-            if qkv in sd:
-                offset = sd[qkv].shape[0] // 3
-                key_map["{}to_q".format(k)] = (qkv, (0, 0, offset))
-                key_map["{}to_k".format(k)] = (qkv, (0, offset, offset))
-                key_map["{}to_v".format(k)] = (qkv, (0, offset * 2, offset))
-                key_map["{}to_out.0".format(k)] = proj
+        diffusers_keys = comfy.utils.mmdit_to_diffusers(model.model_config.unet_config, output_prefix="diffusion_model.")
+        for k in diffusers_keys:
+            if k.endswith(".weight"):
+                to = diffusers_keys[k]
+                key_lora = "transformer.{}".format(k[:-len(".weight")]) #regular diffusers sd3 lora format
+                key_map[key_lora] = to
+
+                key_lora = "base_model.model.{}".format(k[:-len(".weight")]) #format for flash-sd3 lora and others?
+                key_map[key_lora] = to
 
     return key_map
