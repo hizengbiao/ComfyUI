@@ -21,3 +21,4 @@ venv/
 /output*
 my_workflows
 web_custom_versions/
+styles/default.csv
