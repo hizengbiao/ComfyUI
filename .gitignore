@@ -19,3 +19,4 @@ venv/
 *.log
 /output*
 my_workflows
+styles/default.csv
